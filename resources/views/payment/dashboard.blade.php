@@ -1,6 +1,65 @@
 <x-app-layout>
     <x-slot name="title">Payment Dashboard</x-slot>
 
+    <style>
+        .modal-body-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            flex-direction: row;
+        }
+        .modal-col-1 {
+            flex: 1.2;
+            overflow-y: auto;
+            padding: 28px 28px 24px;
+            border-right: 1px solid #f1f5f9;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+        .modal-col-2 {
+            width: 380px;
+            flex-shrink: 0;
+            border-right: 1px solid #f1f5f9;
+            overflow-y: auto;
+            padding: 28px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-sizing: border-box;
+        }
+        .modal-col-3 {
+            width: 320px;
+            flex-shrink: 0;
+            background: #f8fafc;
+            overflow-y: auto;
+            padding: 28px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 1023px) {
+            .modal-body-container {
+                flex-direction: column !important;
+                overflow-y: auto !important;
+            }
+            .modal-col-1, .modal-col-2, .modal-col-3 {
+                width: 100% !important;
+                flex: none !important;
+                flex-shrink: 1 !important;
+                overflow-y: visible !important;
+                border-right: none !important;
+                border-bottom: 1px solid #e2e8f0;
+                padding: 22px 20px !important;
+            }
+            .modal-col-3 {
+                border-bottom: none;
+            }
+        }
+    </style>
+
     <div class="py-12" x-data="{
         showAddChildModal: false,
         studentNumber: '',
@@ -386,10 +445,10 @@
                 <div style="height: 4px; background: linear-gradient(90deg, #059669, #14b8a6, #0ea5e9); flex-shrink: 0;"></div>
 
                 <!-- Three-column body -->
-                <div style="display: flex; flex: 1; overflow: hidden;" class="flex-col lg:flex-row">
+                <div class="modal-body-container">
 
                     <!-- ═══ COLUMN 1: FORM ═══ -->
-                    <div style="flex: 1.2; overflow-y: auto; padding: 28px 28px 24px; border-right: 1px solid #f1f5f9; display: flex; flex-direction: column;">
+                    <div class="modal-col-1">
 
                         <!-- Header -->
                         <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px;">
@@ -518,7 +577,7 @@
                     </div>
 
                     <!-- ═══ COLUMN 2: GOOGLE AI VISION OCR SCAN DETAILS ═══ -->
-                    <div style="width: 380px; flex-shrink: 0; border-right: 1px solid #f1f5f9; overflow-y: auto; padding: 28px 24px; display: flex; flex-direction: column; gap: 16px;">
+                    <div class="modal-col-2">
                         
                         <!-- Panel Title -->
                         <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -696,7 +755,7 @@
                     </div>
 
                     <!-- ═══ COLUMN 3: PAYMENT DETAILS PANEL ═══ -->
-                    <div style="width: 320px; flex-shrink: 0; background: #f8fafc; overflow-y: auto; padding: 28px 22px; display: flex; flex-direction: column; gap: 20px;">
+                    <div class="modal-col-3">
 
                         <!-- Panel Title -->
                         <div>
