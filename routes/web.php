@@ -80,6 +80,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/payment/dashboard', [PaymentController::class, 'showDashboard'])->name('payment.dashboard');
     Route::post('/payment/link-student', [PaymentController::class, 'linkStudent'])->name('payment.link-student');
     Route::post('/payment/submit', [PaymentController::class, 'submitPayment'])->name('payment.submit');
+    Route::post('/payment/ocr-scan', [PaymentController::class, 'ocrScan'])->name('payment.ocr-scan');
     Route::post('/activity/offline', [AuthController::class, 'setOffline'])->name('activity.offline');
 });
 

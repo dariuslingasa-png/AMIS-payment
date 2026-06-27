@@ -16,6 +16,36 @@ class PaymentController extends Controller
     {
         $user = Auth::user();
 
+        // ── AUTO-LINK STUDENTS BY PARENT EMAIL ──────────────────────────────
+        if ($user && $user->email) {
+            try {
+                $userEmail = trim(strtolower($user->email));
+                $matchingApplicants = \App\Models\EnrollmentApplicant::whereRaw('LOWER(TRIM(parent_email)) = ?', [$userEmail])->get();
+                foreach ($matchingApplicants as $applicant) {
+                    $student = \App\Models\Student::where('enrollment_applicant_id', $applicant->id)->first();
+                    if ($student) {
+                        $updated = false;
+                        if ($student->user_id !== $user->id) {
+                            $student->user_id = $user->id;
+                            $student->save();
+                            $updated = true;
+                        }
+                        if ($applicant->user_id !== $user->id) {
+                            $applicant->user_id = $user->id;
+                            $applicant->save();
+                            $updated = true;
+                        }
+                        if ($updated) {
+                            \Illuminate\Support\Facades\Log::info("Auto-linked student {$student->student_number} to parent user ID {$user->id} via email matching.");
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Auto-linking student error: ' . $e->getMessage());
+            }
+        }
+        // ────────────────────────────────────────────────────────────────────
+
         // Fetch all students associated with the parent user
         $students = $user->students()
             ->with(['applicant', 'account'])
@@ -92,10 +122,63 @@ class PaymentController extends Controller
     }
 
     /**
+     * Live OCR scan endpoint: scan an uploaded receipt image and return
+     * detected reference, amount, and date for client-side auto-fill.
+     */
+    public function ocrScan(Request $request)
+    {
+        $request->validate([
+            'receipt' => 'required|file|image|mimes:jpg,jpeg,png|max:5120',
+        ]);
+
+        try {
+            $file = $request->file('receipt');
+            $tmpPath = $file->getRealPath();
+
+            $visionService = new GoogleVisionService();
+            $ocr = $visionService->scanReceipt($tmpPath);
+
+            $detectedDate = $ocr['detected_datetime'];
+            if (!$detectedDate && $ocr['raw_text']) {
+                $patterns = [
+                    '/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},?\s+\d{4}/i',
+                    '/\b\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}\b/',
+                    '/\b\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}\b/',
+                ];
+                foreach ($patterns as $pattern) {
+                    if (preg_match($pattern, $ocr['raw_text'], $m)) {
+                        $detectedDate = $m[0];
+                        break;
+                    }
+                }
+            }
+
+            return response()->json([
+                'success'           => $ocr['success'],
+                'detected_ref'      => $ocr['detected_ref'],
+                'detected_amount'   => $ocr['detected_amount'],
+                'detected_date'     => $detectedDate,
+                'detected_sender'   => $ocr['detected_sender'] ?? null,
+                'detected_receiver' => $ocr['detected_receiver'] ?? null,
+                'detected_merchant' => $ocr['detected_merchant'] ?? null,
+                'detected_method'   => $ocr['detected_method'] ?? null,
+                'detected_account'  => $ocr['detected_account'] ?? null,
+                'has_qr'            => $ocr['has_qr'] ?? false,
+                'confidence'        => $ocr['confidence'] ?? null,
+                'raw_text'          => $ocr['raw_text'],
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('OCR pre-scan error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'OCR scan failed.'], 500);
+        }
+    }
+
+    /**
      * Submit proof of payment for tuition or outstanding student account balances.
      */
     public function submitPayment(Request $request)
     {
+
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
             'method' => 'required|string|in:gcash,bdo,remittance',

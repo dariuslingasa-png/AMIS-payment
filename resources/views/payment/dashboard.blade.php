@@ -353,7 +353,7 @@
             </div>
         </div>
 
-        <!-- Settle Payment Modal — wide two-column layout -->
+        <!-- Settle Tuition Payment Modal — wide three-column layout -->
         <div x-show="showSettlePaymentModal"
              class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm"
              x-transition:enter="transition ease-out duration-300"
@@ -367,7 +367,7 @@
 
             <!-- NO @click.away — modal only closes via X button or Cancel -->
             <div class="relative w-full bg-white rounded-3xl shadow-2xl overflow-hidden"
-                 style="max-width: 860px; width: 96%; max-height: 94vh; display: flex; flex-direction: column;"
+                 style="max-width: 1180px; width: 96%; max-height: 94vh; display: flex; flex-direction: column;"
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0 scale-95 translate-y-4"
                  x-transition:enter-end="opacity-100 scale-100 translate-y-0"
@@ -378,11 +378,11 @@
                 <!-- Top Gradient Bar -->
                 <div style="height: 4px; background: linear-gradient(90deg, #059669, #14b8a6, #0ea5e9); flex-shrink: 0;"></div>
 
-                <!-- Two-column body -->
-                <div style="display: flex; flex: 1; overflow: hidden;">
+                <!-- Three-column body -->
+                <div style="display: flex; flex: 1; overflow: hidden;" class="flex-col lg:flex-row">
 
-                    <!-- ═══ LEFT: FORM ═══ -->
-                    <div style="flex: 1; overflow-y: auto; padding: 28px 28px 24px; border-right: 1px solid #f1f5f9; display: flex; flex-direction: column;">
+                    <!-- ═══ COLUMN 1: FORM ═══ -->
+                    <div style="flex: 1.2; overflow-y: auto; padding: 28px 28px 24px; border-right: 1px solid #f1f5f9; display: flex; flex-direction: column;">
 
                         <!-- Header -->
                         <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px;">
@@ -510,8 +510,186 @@
                         </form>
                     </div>
 
-                    <!-- ═══ RIGHT: PAYMENT DETAILS PANEL ═══ -->
-                    <div style="width: 300px; flex-shrink: 0; background: #f8fafc; overflow-y: auto; padding: 28px 22px; display: flex; flex-direction: column; gap: 20px;">
+                    <!-- ═══ COLUMN 2: GOOGLE AI VISION OCR SCAN DETAILS ═══ -->
+                    <div style="width: 380px; flex-shrink: 0; border-right: 1px solid #f1f5f9; overflow-y: auto; padding: 28px 24px; display: flex; flex-direction: column; gap: 16px;">
+                        
+                        <!-- Panel Title -->
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <span style="font-size: 9px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px;">Real-time Analysis</span>
+                                <h4 style="font-size: 16px; font-weight: 900; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 6px;">
+                                    <svg style="width:18px;height:18px;color:#3b82f6;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                    </svg>
+                                    Google AI Vision OCR
+                                </h4>
+                            </div>
+                            <!-- Live Status Badge -->
+                            <span x-show="ocrScanning" class="animate-pulse" style="background: #eff6ff; color: #1d4ed8; font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 4px;" x-cloak>
+                                <svg class="animate-spin" style="width: 10px; height: 10px;" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                Scanning...
+                            </span>
+                            <span x-show="!ocrScanning && ocrResult" style="background: #ecfdf5; color: #047857; font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em;" x-cloak>
+                                Completed
+                            </span>
+                        </div>
+
+                        <!-- 1. EMPTY STATE -->
+                        <div x-show="!ocrScanning && !ocrResult" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 2px dashed #f1f5f9; border-radius: 20px; padding: 30px 20px; background: #fafafa; margin-top: 10px;">
+                            <div style="background: #f1f5f9; padding: 14px; border-radius: 50%; margin-bottom: 12px; color: #94a3b8;">
+                                <svg style="width: 32px; height: 32px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
+                            <h5 style="font-size: 13px; font-weight: 800; color: #475569; margin: 0 0 6px;">No Scanned Data</h5>
+                            <p style="font-size: 11px; color: #94a3b8; max-width: 220px; line-height: 1.5; margin: 0;">Upload a receipt screenshot in the left column to run real-time Google AI OCR scanning.</p>
+                        </div>
+
+                        <!-- 2. SCANNING STATE -->
+                        <div x-show="ocrScanning" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 2px dashed #e0f2fe; border-radius: 20px; padding: 30px 20px; background: #f0f9ff; margin-top: 10px;" x-cloak>
+                            <div class="relative flex items-center justify-center" style="margin-bottom: 16px;">
+                                <!-- Spinner ring -->
+                                <div class="animate-spin rounded-full border-4 border-blue-500 border-t-transparent" style="width: 56px; height: 56px;"></div>
+                                <!-- Inside scanner icon -->
+                                <svg style="width: 24px; height: 24px; color: #0284c7; position: absolute;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                                </svg>
+                            </div>
+                            <h5 style="font-size: 13px; font-weight: 800; color: #0369a1; margin: 0 0 6px;">Google AI Vision OCR</h5>
+                            <p style="font-size: 11px; color: #0284c7; max-width: 220px; line-height: 1.5; margin: 0;">Reading receipt, verifying reference numbers, sender names, and amount paid...</p>
+                        </div>
+
+                        <!-- 3. RESULTS STATE -->
+                        <div x-show="!ocrScanning && ocrResult" style="display: flex; flex-direction: column; gap: 14px;" x-cloak>
+                            
+                            <!-- Confidence & Quality Indicator -->
+                            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">AI Scan Confidence</span>
+                                    <span style="font-size: 14px; font-weight: 900;" :style="ocrResult?.confidence >= 0.85 ? 'color: #059669;' : 'color: #d97706;'" x-text="(ocrResult?.confidence ? Math.round(ocrResult.confidence * 100) : 95) + '%'"></span>
+                                </div>
+                                <div style="height: 6px; background: #f1f5f9; border-radius: 10px; overflow: hidden;">
+                                    <div style="height: 100%; border-radius: 10px; transition: width 0.6s ease;" :style="'width: ' + ((ocrResult?.confidence ? ocrResult.confidence * 100 : 95)) + '%;' + (ocrResult?.confidence >= 0.85 ? 'background: #10b981;' : 'background: #f59e0b;')"></div>
+                                </div>
+                            </div>
+
+                            <!-- Detected Fields List (The 11 fields) -->
+                            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                                <span style="font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; display: block; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;">Detected Metadata</span>
+                                
+                                <!-- 1. Reference ID -->
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; font-size: 12px; line-height: 1.4;">
+                                    <span style="color: #64748b; font-weight: 700;">Ref / Txn ID</span>
+                                    <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
+                                        <span x-show="ocrResult?.ref" class="font-mono text-slate-900" style="font-weight: 800; text-transform: uppercase;" x-text="ocrResult?.ref"></span>
+                                        <span x-show="!ocrResult?.ref" style="color: #94a3b8; font-style: italic;">Not detected</span>
+                                        <span x-show="ocrResult?.ref" style="font-size: 9px; color: #10b981; font-weight: 800; display: inline-flex; align-items: center; gap: 2px;">
+                                            <span style="width: 4px; height: 4px; border-radius: 50%; background: #10b981;"></span> Auto-filled
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- 2. Amount Paid -->
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; font-size: 12px; line-height: 1.4; border-top: 1px solid #f8fafc; padding-top: 8px;">
+                                    <span style="color: #64748b; font-weight: 700;">Amount Paid</span>
+                                    <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
+                                        <span x-show="ocrResult?.amount" class="text-emerald-700" style="font-weight: 800;" x-text="'₱' + Number(ocrResult.amount).toLocaleString(undefined, {minimumFractionDigits: 2})"></span>
+                                        <span x-show="!ocrResult?.amount" style="color: #94a3b8; font-style: italic;">Not detected</span>
+                                        <span x-show="ocrResult?.amount" style="font-size: 9px; color: #10b981; font-weight: 800; display: inline-flex; align-items: center; gap: 2px;">
+                                            <span style="width: 4px; height: 4px; border-radius: 50%; background: #10b981;"></span> Auto-filled
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- 3. Date & Time -->
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; font-size: 12px; line-height: 1.4; border-top: 1px solid #f8fafc; padding-top: 8px;">
+                                    <span style="color: #64748b; font-weight: 700;">Date & Time</span>
+                                    <div style="text-align: right;">
+                                        <span x-show="ocrResult?.date" class="text-slate-900" style="font-weight: 800;" x-text="ocrResult?.date"></span>
+                                        <span x-show="!ocrResult?.date" style="color: #94a3b8; font-style: italic;">Not detected</span>
+                                    </div>
+                                </div>
+
+                                <!-- 4. Sender Name -->
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; font-size: 12px; line-height: 1.4; border-top: 1px solid #f8fafc; padding-top: 8px;">
+                                    <span style="color: #64748b; font-weight: 700;">Sender Name</span>
+                                    <div style="text-align: right;">
+                                        <span x-show="ocrResult?.sender" class="text-slate-900" style="font-weight: 800; text-transform: uppercase;" x-text="ocrResult?.sender"></span>
+                                        <span x-show="!ocrResult?.sender" style="color: #94a3b8; font-style: italic;">Not detected</span>
+                                    </div>
+                                </div>
+
+                                <!-- 5. Receiver Name -->
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; font-size: 12px; line-height: 1.4; border-top: 1px solid #f8fafc; padding-top: 8px;">
+                                    <span style="color: #64748b; font-weight: 700;">Receiver Name</span>
+                                    <div style="text-align: right;">
+                                        <span x-show="ocrResult?.receiver" class="text-slate-900" style="font-weight: 800; text-transform: uppercase;" x-text="ocrResult?.receiver"></span>
+                                        <span x-show="!ocrResult?.receiver" style="color: #94a3b8; font-style: italic;">Not detected</span>
+                                    </div>
+                                </div>
+
+                                <!-- 6. Payment Method -->
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; font-size: 12px; line-height: 1.4; border-top: 1px solid #f8fafc; padding-top: 8px;">
+                                    <span style="color: #64748b; font-weight: 700;">Payment Method</span>
+                                    <div style="text-align: right;">
+                                        <span x-show="ocrResult?.method" class="text-slate-900" style="font-weight: 800; text-transform: uppercase;" x-text="ocrResult?.method"></span>
+                                        <span x-show="!ocrResult?.method" style="color: #94a3b8; font-style: italic;">Not detected</span>
+                                    </div>
+                                </div>
+
+                                <!-- 7. Account / Mobile -->
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; font-size: 12px; line-height: 1.4; border-top: 1px solid #f8fafc; padding-top: 8px;">
+                                    <span style="color: #64748b; font-weight: 700;">Account / Mobile</span>
+                                    <div style="text-align: right;">
+                                        <span x-show="ocrResult?.account" class="text-slate-900 font-mono" style="font-weight: 800;" x-text="ocrResult?.account"></span>
+                                        <span x-show="!ocrResult?.account" style="color: #94a3b8; font-style: italic;">Not detected</span>
+                                    </div>
+                                </div>
+
+                                <!-- 8. Merchant Name -->
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; font-size: 12px; line-height: 1.4; border-top: 1px solid #f8fafc; padding-top: 8px;">
+                                    <span style="color: #64748b; font-weight: 700;">Merchant Name</span>
+                                    <div style="text-align: right;">
+                                        <span x-show="ocrResult?.merchant" class="text-slate-900" style="font-weight: 800; text-transform: uppercase;" x-text="ocrResult?.merchant"></span>
+                                        <span x-show="!ocrResult?.merchant" style="color: #94a3b8; font-style: italic;">Not detected</span>
+                                    </div>
+                                </div>
+
+                                <!-- 9. QR Code Hint -->
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; font-size: 12px; line-height: 1.4; border-top: 1px solid #f8fafc; padding-top: 8px;">
+                                    <span style="color: #64748b; font-weight: 700;">QR Code Detected?</span>
+                                    <div style="text-align: right;">
+                                        <span :class="ocrResult?.has_qr ? 'text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md font-bold' : 'text-slate-500 font-bold'" x-text="ocrResult?.has_qr ? 'Yes' : 'No'"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 11. Full Raw Receipt Text (Scrollable Box) -->
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 12px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; cursor: pointer;" @click="showRawOcrText = !showRawOcrText">
+                                    <span style="font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 4px;">
+                                        <svg style="width:12px;height:12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"/>
+                                        </svg>
+                                        Full OCR Scanned Text
+                                    </span>
+                                    <svg style="width:12px;height:12px;color:#64748b;transition: transform 0.2s;" :style="showRawOcrText ? 'transform: rotate(180deg);' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </div>
+                                <div x-show="showRawOcrText" style="margin-top: 6px;" x-cloak>
+                                    <div class="font-mono text-slate-600 scrollbar-thin" style="font-size: 10px; max-height: 120px; overflow-y: auto; white-space: pre-wrap; background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px; line-height: 1.5;" x-text="ocrResult?.raw_text"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- ═══ COLUMN 3: PAYMENT DETAILS PANEL ═══ -->
+                    <div style="width: 320px; flex-shrink: 0; background: #f8fafc; overflow-y: auto; padding: 28px 22px; display: flex; flex-direction: column; gap: 20px;">
 
                         <!-- Panel Title -->
                         <div>
