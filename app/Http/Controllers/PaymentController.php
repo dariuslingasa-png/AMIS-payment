@@ -22,22 +22,10 @@ class PaymentController extends Controller
                 $userEmail = trim(strtolower($user->email));
                 $matchingApplicants = \App\Models\EnrollmentApplicant::whereRaw('LOWER(TRIM(parent_email)) = ?', [$userEmail])->get();
                 foreach ($matchingApplicants as $applicant) {
-                    $student = \App\Models\Student::where('enrollment_applicant_id', $applicant->id)->first();
-                    if ($student) {
-                        $updated = false;
-                        if ($student->user_id !== $user->id) {
-                            $student->user_id = $user->id;
-                            $student->save();
-                            $updated = true;
-                        }
-                        if ($applicant->user_id !== $user->id) {
-                            $applicant->user_id = $user->id;
-                            $applicant->save();
-                            $updated = true;
-                        }
-                        if ($updated) {
-                            \Illuminate\Support\Facades\Log::info("Auto-linked student {$student->student_number} to parent user ID {$user->id} via email matching.");
-                        }
+                    if ($applicant->user_id !== $user->id) {
+                        $applicant->user_id = $user->id;
+                        $applicant->save();
+                        \Illuminate\Support\Facades\Log::info("Auto-linked applicant {$applicant->id} to parent user ID {$user->id} via email matching.");
                     }
                 }
             } catch (\Throwable $e) {
@@ -57,69 +45,64 @@ class PaymentController extends Controller
     /**
      * Link an existing student to the parent's user account.
      */
-    public function linkStudent(Request $request)
-    {
-        $validated = $request->validate([
-            'student_number' => 'required|string',
-            'date_of_birth' => 'required|date',
-        ]);
-
-        $studentNumber = trim($validated['student_number']);
-        $dob = $validated['date_of_birth'];
-
-        // Find student by student number (handling optionally formatted numbers)
-        $student = \App\Models\Student::where('student_number', $studentNumber)
-            ->orWhere('student_number', str_replace('-', '', $studentNumber))
-            ->first();
-
-        if (!$student) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No student record found with the given student number.',
-            ], 404);
-        }
-
-        $applicant = $student->applicant;
-        if (!$applicant) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No application details found for this student.',
-            ], 404);
-        }
-
-        // Verify Date of Birth
-        $formattedDob = $applicant->date_of_birth ? $applicant->date_of_birth->format('Y-m-d') : null;
-        if ($formattedDob !== $dob) {
-            return response()->json([
-                'success' => false,
-                'message' => 'The provided date of birth does not match our records.',
-            ], 422);
-        }
-
-        $user = Auth::user();
-
-        // If already linked to this parent
-        if ($student->user_id === $user->id) {
-            return response()->json([
-                'success' => true,
-                'message' => 'This child is already linked to your account.',
-            ]);
-        }
-
-        // Update student and applicant's user_id
-        $student->user_id = $user->id;
-        $student->save();
-
-        if ($applicant->user_id !== $user->id) {
-            $applicant->user_id = $user->id;
-            $applicant->save();
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Child linked successfully!',
-        ]);
-    }
+     public function linkStudent(Request $request)
+     {
+         $validated = $request->validate([
+             'student_number' => 'required|string',
+             'date_of_birth' => 'required|date',
+         ]);
+ 
+         $studentNumber = trim($validated['student_number']);
+         $dob = $validated['date_of_birth'];
+ 
+         // Find student by student number (handling optionally formatted numbers)
+         $student = \App\Models\Student::where('student_number', $studentNumber)
+             ->orWhere('student_number', str_replace('-', '', $studentNumber))
+             ->first();
+ 
+         if (!$student) {
+             return response()->json([
+                 'success' => false,
+                 'message' => 'No student record found with the given student number.',
+             ], 404);
+         }
+ 
+         $applicant = $student->applicant;
+         if (!$applicant) {
+             return response()->json([
+                 'success' => false,
+                 'message' => 'No application details found for this student.',
+             ], 404);
+         }
+ 
+         // Verify Date of Birth
+         $formattedDob = $applicant->date_of_birth ? $applicant->date_of_birth->format('Y-m-d') : null;
+         if ($formattedDob !== $dob) {
+             return response()->json([
+                 'success' => false,
+                 'message' => 'The provided date of birth does not match our records.',
+             ], 422);
+         }
+ 
+         $user = Auth::user();
+ 
+         // If already linked to this parent
+         if ($applicant->user_id === $user->id) {
+             return response()->json([
+                 'success' => true,
+                 'message' => 'This child is already linked to your account.',
+             ]);
+         }
+ 
+         // Update applicant's user_id only (student.user_id belongs to the student's credentials account)
+         $applicant->user_id = $user->id;
+         $applicant->save();
+ 
+         return response()->json([
+             'success' => true,
+             'message' => 'Child linked successfully!',
+         ]);
+     }
 
     /**
      * Live OCR scan endpoint: scan an uploaded receipt image and return
@@ -190,9 +173,7 @@ class PaymentController extends Controller
         $user = Auth::user();
 
         // Verify the student belongs to this parent
-        $student = \App\Models\Student::where('id', $validated['student_id'])
-            ->where('user_id', $user->id)
-            ->first();
+        $student = $user->students()->where('students.id', $validated['student_id'])->first();
 
         if (!$student) {
             return response()->json([

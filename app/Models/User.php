@@ -68,9 +68,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(EnrollmentApplicant::class);
     }
 
-    public function students(): HasMany
+    public function students(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
     {
-        return $this->hasMany(Student::class);
+        return $this->hasManyThrough(
+            Student::class,
+            EnrollmentApplicant::class,
+            'user_id', // Foreign key on EnrollmentApplicant table (parent user_id)
+            'enrollment_applicant_id', // Foreign key on Student table
+            'id', // Local key on parent User table
+            'id' // Local key on EnrollmentApplicant table
+        );
     }
 
     public function isVerified(): bool
