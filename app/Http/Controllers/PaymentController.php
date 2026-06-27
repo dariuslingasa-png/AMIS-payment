@@ -201,6 +201,15 @@ class PaymentController extends Controller
             ], 403);
         }
 
+        // Verify the student applicant status is approved
+        $applicant = $student->applicant;
+        if ($applicant && $applicant->status !== 'approved') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment cannot be submitted for applications that are pending approval.',
+            ], 403);
+        }
+
         $account = $student->account;
         if (!$account) {
             return response()->json([
