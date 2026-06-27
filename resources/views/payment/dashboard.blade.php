@@ -353,7 +353,7 @@
             </div>
         </div>
 
-        <!-- Settle Payment Modal -->
+        <!-- Settle Payment Modal — wide two-column layout -->
         <div x-show="showSettlePaymentModal"
              class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm"
              x-transition:enter="transition ease-out duration-300"
@@ -365,9 +365,9 @@
              style="display: none;"
              x-cloak>
 
-            <!-- Modal Card — NO click.away so outside click does NOT close -->
+            <!-- NO @click.away — modal only closes via X button or Cancel -->
             <div class="relative w-full bg-white rounded-3xl shadow-2xl overflow-hidden"
-                 style="max-width: 520px; width: 95%; max-height: 92vh; display: flex; flex-direction: column;"
+                 style="max-width: 860px; width: 96%; max-height: 94vh; display: flex; flex-direction: column;"
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0 scale-95 translate-y-4"
                  x-transition:enter-end="opacity-100 scale-100 translate-y-0"
@@ -376,173 +376,239 @@
                  x-transition:leave-end="opacity-0 scale-95 translate-y-4">
 
                 <!-- Top Gradient Bar -->
-                <div class="h-1.5 w-full bg-gradient-to-r from-emerald-600 to-teal-500 shrink-0"></div>
+                <div style="height: 4px; background: linear-gradient(90deg, #059669, #14b8a6, #0ea5e9); flex-shrink: 0;"></div>
 
-                <!-- Scrollable Content -->
-                <div class="overflow-y-auto flex-1 p-6 space-y-5">
+                <!-- Two-column body -->
+                <div style="display: flex; flex: 1; overflow: hidden;">
 
-                    <!-- Header -->
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 style="font-size: 18px; font-weight: 900; color: #0f172a; margin: 0;">Settle Tuition Payment</h3>
-                            <p style="font-size: 11px; color: #64748b; margin: 2px 0 0;">Submit your proof of payment for verification.</p>
-                        </div>
-                        <button @click="if (!settleLoading) showSettlePaymentModal = false"
-                                style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer; transition: all 0.15s;"
-                                onmouseover="this.style.background='#fee2e2'; this.style.color='#dc2626'; this.style.borderColor='#fca5a5';"
-                                onmouseout="this.style.background='#f8fafc'; this.style.color='#64748b'; this.style.borderColor='#e2e8f0';">
-                            <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                        </button>
-                    </div>
+                    <!-- ═══ LEFT: FORM ═══ -->
+                    <div style="flex: 1; overflow-y: auto; padding: 28px 28px 24px; border-right: 1px solid #f1f5f9; display: flex; flex-direction: column;">
 
-                    <!-- FULL NAME + BALANCE ROW -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 14px;">
-                            <span style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 3px;">Full Name</span>
-                            <strong x-text="settleStudentName" style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; display: block; line-height: 1.3;"></strong>
-                        </div>
-                        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 14px; padding: 12px 14px;">
-                            <span style="font-size: 10px; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 3px;">Remaining Balance</span>
-                            <strong style="font-size: 15px; font-weight: 900; color: #065f46; display: block;">₱<span x-text="Number(settleRemainingBalance).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"></span></strong>
-                        </div>
-                    </div>
-
-                    <!-- PAYMENT FORM -->
-                    <form @submit.prevent="submitSettlePayment()" class="space-y-4">
-
-                        <!-- PAYMENT METHOD -->
-                        <div>
-                            <label style="display: block; font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px;">Payment Method</label>
-                            <select x-model="settleMethod" :disabled="settleLoading" required
-                                    style="width: 100%; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 11px 36px 11px 14px; outline: none; background-color: #f8fafc; font-family: inherit; font-size: 14px; font-weight: 700; color: #0f172a; cursor: pointer; transition: all 0.15s; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%2364748b\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>'); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;"
-                                    onfocus="this.style.borderColor='#059669'; this.style.backgroundColor='#ffffff'; this.style.boxShadow='0 0 0 3px rgba(5,150,105,0.12)';"
-                                    onblur="this.style.borderColor='#cbd5e1'; this.style.backgroundColor='#f8fafc'; this.style.boxShadow='none';">
-                                <option value="gcash">GCash</option>
-                                <option value="bdo">BDO Bank Transfer</option>
-                                <option value="remittance">Remittance</option>
-                            </select>
-
-                            <!-- Contextual Account Info — shows based on selected method -->
-                            <!-- GCash Info -->
-                            <div x-show="settleMethod === 'gcash'" x-cloak
-                                 style="margin-top: 8px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 11px 14px;">
-                                <span style="font-size: 10px; font-weight: 800; color: #1d4ed8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">📱 GCash Transfer To:</span>
-                                <div style="font-size: 12px; color: #1e40af; line-height: 1.7;">
-                                    <span style="display: block;">Account 1: <strong>(+63) 927 299 1833</strong></span>
-                                    <span style="display: block;">Account 2: <strong>(+63) 995 233 9423</strong></span>
-                                    <span style="display: block; font-size: 10px; font-weight: 800; color: #93c5fd; text-transform: uppercase; margin-top: 2px;">Account Name: CABEL B. NURHASAN</span>
-                                </div>
+                        <!-- Header -->
+                        <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px;">
+                            <div>
+                                <h3 style="font-size: 20px; font-weight: 900; color: #0f172a; margin: 0; line-height: 1.2;">Settle Tuition Payment</h3>
+                                <p style="font-size: 11px; color: #94a3b8; margin: 4px 0 0;">Submit your proof of payment for verification.</p>
                             </div>
-
-                            <!-- BDO Info -->
-                            <div x-show="settleMethod === 'bdo'" x-cloak
-                                 style="margin-top: 8px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 11px 14px;">
-                                <span style="font-size: 10px; font-weight: 800; color: #1d4ed8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">🏦 BDO Deposit / Transfer To:</span>
-                                <div style="font-size: 12px; color: #1e40af; line-height: 1.7;">
-                                    <span style="display: block;">Account 1: <strong>010478011996</strong> (Savings)</span>
-                                    <span style="display: block; font-size: 10px; font-weight: 800; color: #93c5fd; text-transform: uppercase;">Name: AL MUNAWWARA ISLAMIC SCHOOL Inc.</span>
-                                    <span style="display: block; margin-top: 3px;">Account 2: <strong>010478008782</strong> (Current)</span>
-                                    <span style="display: block; font-size: 10px; font-weight: 800; color: #93c5fd; text-transform: uppercase;">Name: CABEL B. NURHASAN</span>
-                                </div>
-                            </div>
-
-                            <!-- Remittance Info -->
-                            <div x-show="settleMethod === 'remittance'" x-cloak
-                                 style="margin-top: 8px; background: #fefce8; border: 1px solid #fde68a; border-radius: 12px; padding: 11px 14px;">
-                                <span style="font-size: 10px; font-weight: 800; color: #92400e; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">📦 Remittance Details:</span>
-                                <div style="font-size: 12px; color: #78350f; line-height: 1.7;">
-                                    <span style="display: block;">Send to: <strong>CABEL B. NURHASAN</strong></span>
-                                    <span style="display: block; font-size: 10px; font-weight: 800; color: #d97706; text-transform: uppercase; margin-top: 2px;">Please coordinate with the Finance Office for remittance details.</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- AMOUNT TO PAY -->
-                        <div>
-                            <label style="display: block; font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px;">Amount to Pay (₱)</label>
-                            <input type="number" x-model.number="settleAmount" :max="settleRemainingBalance" min="1" step="0.01" :disabled="settleLoading" required
-                                   style="width: 100%; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 11px 14px; outline: none; background-color: #f8fafc; font-family: inherit; font-size: 15px; font-weight: 800; color: #065f46; transition: all 0.15s; box-sizing: border-box;"
-                                   onfocus="this.style.borderColor='#059669'; this.style.backgroundColor='#ffffff'; this.style.boxShadow='0 0 0 3px rgba(5,150,105,0.12)';"
-                                   onblur="this.style.borderColor='#cbd5e1'; this.style.backgroundColor='#f8fafc'; this.style.boxShadow='none';">
-                        </div>
-
-                        <!-- REFERENCE / TRANSACTION ID -->
-                        <div>
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                                <label style="font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.06em;">Reference / Transaction ID</label>
-                                <span style="display: inline-flex; align-items: center; gap: 4px; background: linear-gradient(135deg, #4285f4, #34a853); color: white; font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.04em;">
-                                    <svg style="width:10px;height:10px;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
-                                    Google AI Vision
-                                </span>
-                            </div>
-                            <input type="text" x-model="settleReference" placeholder="e.g. GCash Ref # / BDO Trace Code" :disabled="settleLoading"
-                                   style="width: 100%; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 11px 14px; outline: none; background-color: #f8fafc; font-family: inherit; font-size: 13px; font-weight: 700; color: #0f172a; text-transform: uppercase; transition: all 0.15s; box-sizing: border-box;"
-                                   onfocus="this.style.borderColor='#059669'; this.style.backgroundColor='#ffffff'; this.style.boxShadow='0 0 0 3px rgba(5,150,105,0.12)';"
-                                   onblur="this.style.borderColor='#cbd5e1'; this.style.backgroundColor='#f8fafc'; this.style.boxShadow='none';">
-                            <p style="font-size: 10px; color: #94a3b8; margin: 5px 0 0; font-style: italic;">Our AI will automatically scan your receipt to verify this reference number.</p>
-                        </div>
-
-                        <!-- PROOF OF PAYMENT -->
-                        <div>
-                            <label style="display: block; font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px;">Proof of Payment Receipt</label>
-
-                            <!-- Upload Area -->
-                            <div x-show="!settleReceiptPreview" x-cloak>
-                                <label style="display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 24px 16px; background: #f8fafc; cursor: pointer; transition: all 0.2s;"
-                                       onmouseover="this.style.borderColor='#059669'; this.style.background='#f0fdf4';"
-                                       onmouseout="this.style.borderColor='#cbd5e1'; this.style.background='#f8fafc';">
-                                    <svg style="width:32px; height:32px; color:#94a3b8; margin-bottom:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                    </svg>
-                                    <span style="font-size: 13px; font-weight: 700; color: #334155;">Upload Receipt Screenshot</span>
-                                    <span style="font-size: 11px; color: #94a3b8; margin-top: 3px;">JPG, JPEG, or PNG — up to 5MB</span>
-                                    <input type="file" x-ref="settleFileInput" @change="handleSettleFileChange($event)" accept="image/*" class="hidden" :required="!settleReceiptFile">
-                                </label>
-                            </div>
-
-                            <!-- Preview Box -->
-                            <div x-show="settleReceiptPreview" class="flex flex-col items-center" x-cloak>
-                                <div style="position: relative; width: 160px; height: 160px; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; background: #f8fafc;">
-                                    <img :src="settleReceiptPreview" style="width: 100%; height: 100%; object-fit: cover;">
-                                    <button type="button" @click="removeSettleFile()" :disabled="settleLoading"
-                                            style="position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; background: #dc2626; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; box-shadow: 0 1px 4px rgba(0,0,0,0.2);">
-                                        <svg style="width:12px;height:12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <span x-text="settleReceiptFile?.name" style="margin-top: 6px; font-size: 10px; color: #94a3b8; font-weight: 700; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; text-align: center;"></span>
-                            </div>
-                        </div>
-
-                        <!-- Notifications -->
-                        <div x-show="settleErrorMsg" x-text="settleErrorMsg"
-                             style="padding: 12px 14px; font-size: 12px; font-weight: 600; color: #991b1b; background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px;" x-cloak></div>
-                        <div x-show="settleSuccessMsg" x-text="settleSuccessMsg"
-                             style="padding: 12px 14px; font-size: 12px; font-weight: 600; color: #065f46; background: #f0fdf4; border: 1px solid #a7f3d0; border-radius: 12px;" x-cloak></div>
-
-                        <!-- Actions -->
-                        <div style="display: flex; gap: 10px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
-                            <button type="button" @click="if (!settleLoading) showSettlePaymentModal = false" :disabled="settleLoading"
-                                    style="flex: 1; padding: 11px 16px; font-size: 13px; font-weight: 700; color: #475569; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: all 0.15s;"
-                                    onmouseover="this.style.background='#f1f5f9';"
-                                    onmouseout="this.style.background='#f8fafc';">
-                                Cancel
-                            </button>
-                            <button type="submit" :disabled="settleLoading"
-                                    style="flex: 2; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 16px; font-size: 13px; font-weight: 800; color: #ffffff; background: #047857; border: none; border-radius: 12px; cursor: pointer; transition: all 0.15s; box-shadow: 0 2px 8px rgba(4,120,87,0.3);"
-                                    onmouseover="this.style.background='#065f46';"
-                                    onmouseout="this.style.background='#047857';">
-                                <svg x-show="settleLoading" style="width:16px;height:16px;animation:spin 1s linear infinite;" fill="none" viewBox="0 0 24 24">
-                                    <circle style="opacity:0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path style="opacity:0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            <button @click="if (!settleLoading) showSettlePaymentModal = false"
+                                    style="display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer; flex-shrink: 0; transition: all 0.15s;"
+                                    onmouseover="this.style.background='#fee2e2'; this.style.color='#dc2626'; this.style.borderColor='#fca5a5';"
+                                    onmouseout="this.style.background='#f8fafc'; this.style.color='#64748b'; this.style.borderColor='#e2e8f0';">
+                                <svg style="width:15px;height:15px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
-                                <span x-text="settleLoading ? 'Submitting...' : 'Submit Payment'"></span>
                             </button>
                         </div>
-                    </form>
+
+                        <!-- Full Name + Balance -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 14px;">
+                                <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 3px;">Full Name</span>
+                                <strong x-text="settleStudentName" style="font-size: 13px; font-weight: 900; color: #0f172a; text-transform: uppercase; display: block; line-height: 1.3;"></strong>
+                            </div>
+                            <div style="background: linear-gradient(135deg, #ecfdf5, #d1fae5); border: 1px solid #6ee7b7; border-radius: 14px; padding: 12px 14px;">
+                                <span style="font-size: 9px; font-weight: 800; color: #059669; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 3px;">Remaining Balance</span>
+                                <strong style="font-size: 16px; font-weight: 900; color: #064e3b; display: block;">&#8369;<span x-text="Number(settleRemainingBalance).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"></span></strong>
+                            </div>
+                        </div>
+
+                        <!-- FORM -->
+                        <form @submit.prevent="submitSettlePayment()" style="display: flex; flex-direction: column; gap: 16px; flex: 1;">
+
+                            <!-- Payment Method -->
+                            <div>
+                                <label style="display: block; font-size: 9px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">Payment Method</label>
+                                <select x-model="settleMethod" :disabled="settleLoading" required
+                                        style="width: 100%; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 11px 36px 11px 14px; outline: none; background-color: #f8fafc; font-family: inherit; font-size: 14px; font-weight: 700; color: #0f172a; cursor: pointer; transition: all 0.15s; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%2364748b\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>'); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; box-sizing: border-box;"
+                                        onfocus="this.style.borderColor='#059669'; this.style.backgroundColor='#ffffff'; this.style.boxShadow='0 0 0 3px rgba(5,150,105,0.12)';"
+                                        onblur="this.style.borderColor='#e2e8f0'; this.style.backgroundColor='#f8fafc'; this.style.boxShadow='none';">
+                                    <option value="gcash">GCash</option>
+                                    <option value="bdo">BDO Bank Transfer</option>
+                                    <option value="remittance">Remittance</option>
+                                </select>
+                            </div>
+
+                            <!-- Amount to Pay -->
+                            <div>
+                                <label style="display: block; font-size: 9px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">Amount to Pay (&#8369;)</label>
+                                <input type="number" x-model.number="settleAmount" :max="settleRemainingBalance" min="1" step="0.01" :disabled="settleLoading" required
+                                       style="width: 100%; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 11px 14px; outline: none; background-color: #f8fafc; font-family: inherit; font-size: 16px; font-weight: 900; color: #064e3b; transition: all 0.15s; box-sizing: border-box;"
+                                       onfocus="this.style.borderColor='#059669'; this.style.backgroundColor='#ffffff'; this.style.boxShadow='0 0 0 3px rgba(5,150,105,0.12)';"
+                                       onblur="this.style.borderColor='#e2e8f0'; this.style.backgroundColor='#f8fafc'; this.style.boxShadow='none';">
+                            </div>
+
+                            <!-- Reference / Transaction ID -->
+                            <div>
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                                    <label style="font-size: 9px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.08em;">Reference / Transaction ID</label>
+                                    <span style="display: inline-flex; align-items: center; gap: 3px; background: linear-gradient(135deg, #4285f4, #34a853); color: white; font-size: 8px; font-weight: 800; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em;">
+                                        <svg style="width:9px;height:9px;" viewBox="0 0 24 24" fill="currentColor"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+                                        Google AI Vision
+                                    </span>
+                                </div>
+                                <input type="text" x-model="settleReference" placeholder="e.g. GCash Ref # / BDO Trace Code" :disabled="settleLoading"
+                                       style="width: 100%; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 11px 14px; outline: none; background-color: #f8fafc; font-family: inherit; font-size: 13px; font-weight: 700; color: #0f172a; text-transform: uppercase; transition: all 0.15s; box-sizing: border-box;"
+                                       onfocus="this.style.borderColor='#059669'; this.style.backgroundColor='#ffffff'; this.style.boxShadow='0 0 0 3px rgba(5,150,105,0.12)';"
+                                       onblur="this.style.borderColor='#e2e8f0'; this.style.backgroundColor='#f8fafc'; this.style.boxShadow='none';">
+                                <p style="font-size: 10px; color: #94a3b8; margin: 5px 0 0; font-style: italic;">Our AI will scan your receipt and verify this reference number automatically.</p>
+                            </div>
+
+                            <!-- Proof of Payment -->
+                            <div>
+                                <label style="display: block; font-size: 9px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">Proof of Payment Receipt</label>
+                                <div x-show="!settleReceiptPreview" x-cloak>
+                                    <label style="display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed #cbd5e1; border-radius: 14px; padding: 22px 16px; background: #f8fafc; cursor: pointer; transition: all 0.2s;"
+                                           onmouseover="this.style.borderColor='#059669'; this.style.background='#f0fdf4';"
+                                           onmouseout="this.style.borderColor='#cbd5e1'; this.style.background='#f8fafc';">
+                                        <svg style="width:28px;height:28px;color:#94a3b8;margin-bottom:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        <span style="font-size: 13px; font-weight: 700; color: #334155;">Upload Receipt Screenshot</span>
+                                        <span style="font-size: 11px; color: #94a3b8; margin-top: 3px;">JPG, JPEG, or PNG — up to 5MB</span>
+                                        <input type="file" x-ref="settleFileInput" @change="handleSettleFileChange($event)" accept="image/*" class="hidden" :required="!settleReceiptFile">
+                                    </label>
+                                </div>
+                                <div x-show="settleReceiptPreview" style="display: flex; flex-direction: column; align-items: center;" x-cloak>
+                                    <div style="position: relative; width: 150px; height: 150px; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; background: #f8fafc;">
+                                        <img :src="settleReceiptPreview" style="width: 100%; height: 100%; object-fit: cover;">
+                                        <button type="button" @click="removeSettleFile()" :disabled="settleLoading"
+                                                style="position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; background: #dc2626; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white;">
+                                            <svg style="width:11px;height:11px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <span x-text="settleReceiptFile?.name" style="margin-top: 6px; font-size: 10px; color: #94a3b8; font-weight: 700; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; text-align: center;"></span>
+                                </div>
+                            </div>
+
+                            <!-- Notifications -->
+                            <div x-show="settleErrorMsg" x-text="settleErrorMsg"
+                                 style="padding: 11px 14px; font-size: 12px; font-weight: 600; color: #991b1b; background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px;" x-cloak></div>
+                            <div x-show="settleSuccessMsg" x-text="settleSuccessMsg"
+                                 style="padding: 11px 14px; font-size: 12px; font-weight: 600; color: #065f46; background: #f0fdf4; border: 1px solid #a7f3d0; border-radius: 12px;" x-cloak></div>
+
+                            <!-- Actions -->
+                            <div style="display: flex; gap: 10px; padding-top: 14px; border-top: 1px solid #f1f5f9; margin-top: auto;">
+                                <button type="button" @click="if (!settleLoading) showSettlePaymentModal = false" :disabled="settleLoading"
+                                        style="flex: 1; padding: 12px 16px; font-size: 13px; font-weight: 700; color: #475569; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: all 0.15s;"
+                                        onmouseover="this.style.background='#f1f5f9';"
+                                        onmouseout="this.style.background='#f8fafc';">
+                                    Cancel
+                                </button>
+                                <button type="submit" :disabled="settleLoading"
+                                        style="flex: 2; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; font-size: 13px; font-weight: 800; color: #ffffff; background: #047857; border: none; border-radius: 12px; cursor: pointer; transition: all 0.15s; box-shadow: 0 2px 10px rgba(4,120,87,0.35);"
+                                        onmouseover="this.style.background='#065f46';"
+                                        onmouseout="this.style.background='#047857';">
+                                    <svg x-show="settleLoading" style="width:16px;height:16px;animation:spin 1s linear infinite;" fill="none" viewBox="0 0 24 24">
+                                        <circle style="opacity:0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path style="opacity:0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                    </svg>
+                                    <span x-text="settleLoading ? 'Submitting...' : 'Submit Payment'"></span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- ═══ RIGHT: PAYMENT DETAILS PANEL ═══ -->
+                    <div style="width: 300px; flex-shrink: 0; background: #f8fafc; overflow-y: auto; padding: 28px 22px; display: flex; flex-direction: column; gap: 20px;">
+
+                        <!-- Panel Title -->
+                        <div>
+                            <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px;">Where to Send Payment</span>
+                            <h4 style="font-size: 16px; font-weight: 900; color: #0f172a; margin: 0;"
+                                x-text="settleMethod === 'gcash' ? 'GCash Details' : settleMethod === 'bdo' ? 'BDO Bank Details' : 'Remittance Details'"></h4>
+                        </div>
+
+                        <!-- ── GCash Panel ── -->
+                        <div x-show="settleMethod === 'gcash'" x-cloak style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="background: white; border: 1px solid #dbeafe; border-radius: 16px; padding: 16px; box-shadow: 0 1px 4px rgba(37,99,235,0.07);">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+                                    <div style="background: #1e40af; color: white; font-size: 11px; font-weight: 900; padding: 4px 10px; border-radius: 8px; letter-spacing: 0.03em;">GCash</div>
+                                    <span style="font-size: 12px; font-weight: 700; color: #1d4ed8;">Mobile Transfer</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    <div style="background: #eff6ff; border-radius: 10px; padding: 10px 12px;">
+                                        <span style="font-size: 9px; font-weight: 800; color: #93c5fd; text-transform: uppercase; letter-spacing: 0.07em; display: block; margin-bottom: 3px;">Account 1</span>
+                                        <span style="font-size: 18px; font-weight: 900; color: #1e40af; display: block; letter-spacing: 0.02em;">(+63) 927 299 1833</span>
+                                    </div>
+                                    <div style="background: #eff6ff; border-radius: 10px; padding: 10px 12px;">
+                                        <span style="font-size: 9px; font-weight: 800; color: #93c5fd; text-transform: uppercase; letter-spacing: 0.07em; display: block; margin-bottom: 3px;">Account 2</span>
+                                        <span style="font-size: 18px; font-weight: 900; color: #1e40af; display: block; letter-spacing: 0.02em;">(+63) 995 233 9423</span>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #dbeafe;">
+                                    <span style="font-size: 9px; font-weight: 800; color: #93c5fd; text-transform: uppercase; letter-spacing: 0.07em; display: block; margin-bottom: 3px;">Account Name</span>
+                                    <span style="font-size: 14px; font-weight: 900; color: #1e3a8a; display: block;">CABEL B. NURHASAN</span>
+                                </div>
+                            </div>
+                            <div style="background: #dbeafe; border-radius: 10px; padding: 10px 12px; font-size: 11px; color: #1e40af; font-weight: 600; line-height: 1.6;">
+                                &#128242; Send the exact amount and screenshot the successful transaction receipt.
+                            </div>
+                        </div>
+
+                        <!-- ── BDO Panel ── -->
+                        <div x-show="settleMethod === 'bdo'" x-cloak style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="background: white; border: 1px solid #dbeafe; border-radius: 16px; padding: 16px; box-shadow: 0 1px 4px rgba(37,99,235,0.07);">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+                                    <div style="background: #1e3a8a; color: white; font-size: 11px; font-weight: 900; padding: 4px 10px; border-radius: 8px;">BDO</div>
+                                    <span style="font-size: 12px; font-weight: 700; color: #1d4ed8;">Bank Deposit / Transfer</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    <div style="background: #eff6ff; border-radius: 10px; padding: 10px 12px;">
+                                        <span style="font-size: 9px; font-weight: 800; color: #93c5fd; text-transform: uppercase; letter-spacing: 0.07em; display: block; margin-bottom: 2px;">Account 1 — Savings</span>
+                                        <span style="font-size: 20px; font-weight: 900; color: #1e40af; display: block; letter-spacing: 0.04em;">010478011996</span>
+                                        <span style="font-size: 10px; font-weight: 700; color: #3b82f6; display: block; margin-top: 3px;">AL MUNAWWARA ISLAMIC SCHOOL Inc.</span>
+                                    </div>
+                                    <div style="background: #eff6ff; border-radius: 10px; padding: 10px 12px;">
+                                        <span style="font-size: 9px; font-weight: 800; color: #93c5fd; text-transform: uppercase; letter-spacing: 0.07em; display: block; margin-bottom: 2px;">Account 2 — Current</span>
+                                        <span style="font-size: 20px; font-weight: 900; color: #1e40af; display: block; letter-spacing: 0.04em;">010478008782</span>
+                                        <span style="font-size: 10px; font-weight: 700; color: #3b82f6; display: block; margin-top: 3px;">CABEL B. NURHASAN</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="background: #dbeafe; border-radius: 10px; padding: 10px 12px; font-size: 11px; color: #1e40af; font-weight: 600; line-height: 1.6;">
+                                &#127970; Deposit over-the-counter or via online banking. Upload your deposit slip or transfer confirmation.
+                            </div>
+                        </div>
+
+                        <!-- ── Remittance Panel ── -->
+                        <div x-show="settleMethod === 'remittance'" x-cloak style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="background: white; border: 1px solid #fde68a; border-radius: 16px; padding: 16px; box-shadow: 0 1px 4px rgba(217,119,6,0.07);">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+                                    <div style="background: #d97706; color: white; font-size: 11px; font-weight: 900; padding: 4px 10px; border-radius: 8px;">REM</div>
+                                    <span style="font-size: 12px; font-weight: 700; color: #92400e;">Remittance</span>
+                                </div>
+                                <div style="background: #fefce8; border-radius: 10px; padding: 12px 14px;">
+                                    <span style="font-size: 9px; font-weight: 800; color: #d97706; text-transform: uppercase; letter-spacing: 0.07em; display: block; margin-bottom: 4px;">Send Payment To</span>
+                                    <span style="font-size: 18px; font-weight: 900; color: #78350f; display: block;">CABEL B. NURHASAN</span>
+                                </div>
+                            </div>
+                            <div style="background: #fef9c3; border-radius: 10px; padding: 10px 12px; font-size: 11px; color: #92400e; font-weight: 600; line-height: 1.6;">
+                                &#128230; Please coordinate with the Finance Office for complete remittance center details before sending.
+                            </div>
+                        </div>
+
+                        <!-- Reminders -->
+                        <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; margin-top: auto;">
+                            <p style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 10px;">&#128203; Reminders</p>
+                            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;">
+                                <li style="display: flex; gap: 7px; align-items: flex-start; font-size: 11px; color: #64748b; font-weight: 500; line-height: 1.5;">
+                                    <span style="color: #059669; font-weight: 900; flex-shrink: 0; margin-top: 1px;">&#10003;</span>
+                                    Upload a clear, full screenshot of your receipt
+                                </li>
+                                <li style="display: flex; gap: 7px; align-items: flex-start; font-size: 11px; color: #64748b; font-weight: 500; line-height: 1.5;">
+                                    <span style="color: #059669; font-weight: 900; flex-shrink: 0; margin-top: 1px;">&#10003;</span>
+                                    Make sure the reference number is visible in the receipt
+                                </li>
+                                <li style="display: flex; gap: 7px; align-items: flex-start; font-size: 11px; color: #64748b; font-weight: 500; line-height: 1.5;">
+                                    <span style="color: #059669; font-weight: 900; flex-shrink: 0; margin-top: 1px;">&#10003;</span>
+                                    Finance Office verifies within 1-2 business days
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
