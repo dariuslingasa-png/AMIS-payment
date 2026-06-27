@@ -364,8 +364,9 @@
              x-transition:leave-end="opacity-0"
              style="display: none;"
              x-cloak>
-            <div class="relative w-full max-w-lg bg-white rounded-3xl border border-slate-200 shadow-xl max-h-[90vh] overflow-y-auto"
+            <div class="relative w-full bg-white rounded-3xl border border-slate-200 shadow-xl max-h-[90vh] overflow-y-auto"
                  @click.away="if (!settleLoading) showSettlePaymentModal = false"
+                 style="max-width: 550px !important; width: 95% !important; margin: auto !important; box-sizing: border-box !important;"
                  x-transition:enter="transition ease-out duration-300 transform scale-95"
                  x-transition:enter-start="opacity-0 scale-95"
                  x-transition:enter-end="opacity-100 scale-100"
@@ -440,7 +441,10 @@
                             <div>
                                 <label class="block text-xxs font-bold text-slate-700 uppercase mb-1.5">Payment Method</label>
                                 <select x-model="settleMethod" :disabled="settleLoading"
-                                        class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition" required>
+                                        style="width: 100% !important; border: 1px solid #cbd5e1 !important; border-radius: 12px !important; padding: 10px 14px !important; outline: none !important; background-color: #f8fafc !important; font-family: inherit !important; font-size: 14px !important; font-weight: 600 !important; color: #0f172a !important; cursor: pointer !important; transition: all 0.15s ease-in-out !important; appearance: none !important; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%2364748b\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>') !important; background-repeat: no-repeat !important; background-position: right 12px center !important; background-size: 16px !important; padding-right: 36px !important;"
+                                        onfocus="this.style.borderColor='#059669'; this.style.backgroundColor='#ffffff'; this.style.boxShadow='0 0 0 2px rgba(5, 150, 105, 0.15)';"
+                                        onblur="this.style.borderColor='#cbd5e1'; this.style.backgroundColor='#f8fafc'; this.style.boxShadow='none';"
+                                        required>
                                     <option value="gcash">GCash</option>
                                     <option value="maya">Maya</option>
                                     <option value="bdo">BDO Bank Transfer</option>
@@ -449,14 +453,19 @@
                             <div>
                                 <label class="block text-xxs font-bold text-slate-700 uppercase mb-1.5">Amount to Pay (₱)</label>
                                 <input type="number" x-model.number="settleAmount" :max="settleRemainingBalance" min="1" step="0.01" :disabled="settleLoading"
-                                       class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition font-semibold" required>
+                                       style="width: 100% !important; border: 1px solid #cbd5e1 !important; border-radius: 12px !important; padding: 10px 14px !important; outline: none !important; background-color: #f8fafc !important; font-family: inherit !important; font-size: 14px !important; font-weight: 700 !important; color: #0f172a !important; transition: all 0.15s ease-in-out !important;"
+                                       onfocus="this.style.borderColor='#059669'; this.style.backgroundColor='#ffffff'; this.style.boxShadow='0 0 0 2px rgba(5, 150, 105, 0.15)';"
+                                       onblur="this.style.borderColor='#cbd5e1'; this.style.backgroundColor='#f8fafc'; this.style.boxShadow='none';"
+                                       required>
                             </div>
                         </div>
 
                         <div>
                             <label class="block text-xxs font-bold text-slate-700 uppercase mb-1.5">Reference No / Transaction ID</label>
                             <input type="text" x-model="settleReference" placeholder="e.g. Ref # / Trace Code" :disabled="settleLoading"
-                                   class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition uppercase font-semibold">
+                                   style="width: 100% !important; border: 1px solid #cbd5e1 !important; border-radius: 12px !important; padding: 10px 14px !important; outline: none !important; background-color: #f8fafc !important; font-family: inherit !important; font-size: 14px !important; font-weight: 700 !important; color: #0f172a !important; text-transform: uppercase !important; transition: all 0.15s ease-in-out !important;"
+                                   onfocus="this.style.borderColor='#059669'; this.style.backgroundColor='#ffffff'; this.style.boxShadow='0 0 0 2px rgba(5, 150, 105, 0.15)';"
+                                   onblur="this.style.borderColor='#cbd5e1'; this.style.backgroundColor='#f8fafc'; this.style.boxShadow='none';">
                         </div>
 
                         <!-- 1:1 Aspect Ratio square receipt preview area -->
