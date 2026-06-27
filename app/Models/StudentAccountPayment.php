@@ -12,6 +12,7 @@ class StudentAccountPayment extends Model
         'method', 'reference_no', 'or_number', 'checked_by', 'account_received',
         'amount', 'receipt_url', 'status', 'remarks',
         'paid_at', 'verified_at',
+        'ocr_status', 'ocr_raw_text', 'ocr_scanned_ref', 'ocr_scanned_amount',
     ];
 
     protected $casts = [

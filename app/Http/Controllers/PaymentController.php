@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use App\Services\GoogleVisionService;
 
 class PaymentController extends Controller
 {
@@ -143,21 +145,70 @@ class PaymentController extends Controller
             ], 500);
         }
 
+        // ── Google Vision OCR: scan the uploaded receipt ────────────────────
+        $ocrStatus        = 'skipped';
+        $ocrRawText       = null;
+        $ocrScannedRef    = null;
+        $ocrScannedAmount = null;
+
+        try {
+            $absolutePath = Storage::disk('public')->path($path);
+            $visionService = new GoogleVisionService();
+            $ocr = $visionService->scanReceipt($absolutePath);
+
+            $ocrStatus        = $ocr['status'];
+            $ocrRawText       = $ocr['raw_text'];
+            $ocrScannedRef    = $ocr['detected_ref'];
+            $ocrScannedAmount = $ocr['detected_amount'];
+
+            // Determine match quality: compare scanned ref & amount vs what parent typed
+            if ($ocr['success'] && $ocr['status'] === 'processed') {
+                $submittedRef    = strtolower(preg_replace('/\s+/', '', $validated['reference_no'] ?? ''));
+                $scannedRef      = strtolower(preg_replace('/\s+/', '', $ocrScannedRef ?? ''));
+                $amountMatches   = $ocrScannedAmount !== null && abs($ocrScannedAmount - $validated['amount']) < 1.0;
+                $refMatches      = $submittedRef && $scannedRef && str_contains($scannedRef, $submittedRef);
+
+                if ($amountMatches && $refMatches) {
+                    $ocrStatus = 'matched';
+                } elseif ($amountMatches || $refMatches) {
+                    $ocrStatus = 'partial_match';
+                } else {
+                    $ocrStatus = 'mismatch';
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('OCR integration error: ' . $e->getMessage());
+            $ocrStatus = 'failed';
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
         // Create a StudentAccountPayment record
         $payment = \App\Models\StudentAccountPayment::create([
-            'student_account_id' => $account->id,
-            'student_id' => $student->id,
-            'method' => $validated['method'],
-            'reference_no' => $validated['reference_no'] ?? null,
-            'amount' => $validated['amount'],
-            'receipt_url' => $path,
-            'status' => 'pending',
-            'paid_at' => now(),
+            'student_account_id'  => $account->id,
+            'student_id'          => $student->id,
+            'method'              => $validated['method'],
+            'reference_no'        => $validated['reference_no'] ?? null,
+            'amount'              => $validated['amount'],
+            'receipt_url'         => $path,
+            'status'              => 'pending',
+            'paid_at'             => now(),
+            'ocr_status'          => $ocrStatus,
+            'ocr_raw_text'        => $ocrRawText,
+            'ocr_scanned_ref'     => $ocrScannedRef,
+            'ocr_scanned_amount'  => $ocrScannedAmount,
         ]);
+
+        // Build a user-facing message enriched with OCR match feedback
+        $ocrNote = match($ocrStatus) {
+            'matched'       => ' ✅ Receipt details verified by our system.',
+            'partial_match' => ' ⚠️ Some details partially matched. Finance will double-check.',
+            'mismatch'      => ' ⚠️ Receipt could not be automatically verified. Please ensure the screenshot is clear.',
+            default         => '',
+        };
 
         return response()->json([
             'success' => true,
-            'message' => 'Proof of payment submitted successfully! Our Finance Office will verify your transaction shortly.',
+            'message' => 'Proof of payment submitted successfully! Our Finance Office will verify your transaction shortly.' . $ocrNote,
         ]);
     }
 }
