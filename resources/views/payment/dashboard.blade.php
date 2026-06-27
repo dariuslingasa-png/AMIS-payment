@@ -446,8 +446,8 @@
                                         onblur="this.style.borderColor='#cbd5e1'; this.style.backgroundColor='#f8fafc'; this.style.boxShadow='none';"
                                         required>
                                     <option value="gcash">GCash</option>
-                                    <option value="maya">Maya</option>
                                     <option value="bdo">BDO Bank Transfer</option>
+                                    <option value="remittance">Remittance</option>
                                 </select>
                             </div>
                             <div>

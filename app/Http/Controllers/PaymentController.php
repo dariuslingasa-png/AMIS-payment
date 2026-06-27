@@ -98,7 +98,7 @@ class PaymentController extends Controller
     {
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
-            'method' => 'required|string|in:gcash,maya,bdo',
+            'method' => 'required|string|in:gcash,bdo,remittance',
             'reference_no' => 'nullable|string|max:100',
             'amount' => 'required|numeric|min:1|max:999999',
             'receipt' => 'required|file|image|mimes:jpg,jpeg,png|max:5120',
